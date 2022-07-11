@@ -430,7 +430,7 @@ func getPVCs(ctx context.Context, w *log.Logger, clientset k8sclient.Interface, 
 				return nil, nil, fmt.Errorf("failed to get PVC for PV %s in %s: %w", pv.Spec.ClaimRef.Name, pv.Spec.ClaimRef.Namespace, err)
 			}
 			if pv.Spec.ClaimRef.Namespace == Namespace && Namespace != "" {
-				matchingPVCs[pv.Spec.ClaimRef.Namespace] = append(matchingPVCs[Namespace], *pvc)
+				matchingPVCs[Namespace] = append(matchingPVCs[Namespace], *pvc)
 			} else if Namespace == "" {
 				matchingPVCs[pv.Spec.ClaimRef.Namespace] = append(matchingPVCs[pv.Spec.ClaimRef.Namespace], *pvc)
 			}
