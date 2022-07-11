@@ -429,9 +429,8 @@ func getPVCs(ctx context.Context, w *log.Logger, clientset k8sclient.Interface, 
 			if err != nil {
 				return nil, nil, fmt.Errorf("failed to get PVC for PV %s in %s: %w", pv.Spec.ClaimRef.Name, pv.Spec.ClaimRef.Namespace, err)
 			}
-			if pv.Spec.ClaimRef.Namespace == Namespace && Namespace != "" {
-				matchingPVCs[Namespace] = append(matchingPVCs[Namespace], *pvc)
-			} else if Namespace == "" {
+
+			if (pv.Spec.ClaimRef.Namespace == Namespace && Namespace != "") || Namespace == "" {
 				matchingPVCs[pv.Spec.ClaimRef.Namespace] = append(matchingPVCs[pv.Spec.ClaimRef.Namespace], *pvc)
 			}
 
@@ -445,7 +444,7 @@ func getPVCs(ctx context.Context, w *log.Logger, clientset k8sclient.Interface, 
 		pvcNamespaces = append(pvcNamespaces, idx)
 	}
 
-	w.Printf("\nFound %d matching PVCs to migrate across %d namespaces:\n", len(matchingPVs), len(matchingPVCs))
+	w.Printf("\nFound %d matching PVCs to migrate across %d namespaces:\n", len(matchingPVCs), len(matchingPVCs))
 	tw := tabwriter.NewWriter(w.Writer(), 2, 2, 1, ' ', 0)
 	_, _ = fmt.Fprintf(tw, "namespace:\tpvc:\tpv:\tsize:\t\n")
 	for ns, nsPvcs := range matchingPVCs {

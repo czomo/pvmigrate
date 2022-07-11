@@ -17,6 +17,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	k8sclient "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/fake"
+	"k8s.io/utils/pointer"
 )
 
 type testWriter struct {
@@ -865,7 +866,8 @@ func TestGetPVCs(t *testing.T) {
 						Namespace: "ns2",
 					},
 					Spec: corev1.PersistentVolumeClaimSpec{
-						VolumeName: "pv2",
+						VolumeName:       "pv2",
+						StorageClassName: pointer.String("sc1"),
 					},
 				},
 			},
@@ -875,9 +877,9 @@ func TestGetPVCs(t *testing.T) {
 				require.Equalf(t, dscString, *pvc1.Spec.StorageClassName, "storage class name was %q not dsc", *pvc1.Spec.StorageClassName)
 				require.Equalf(t, "1Gi", pvc1.Spec.Resources.Requests.Storage().String(), "PVC size was %q not 1Gi", pvc1.Spec.Resources.Requests.Storage().String())
 
-				// pvc2, err := clientset.CoreV1().PersistentVolumeClaims("ns2").Get(context.TODO(), "pvc2", metav1.GetOptions{})
-				// require.NoError(t, err)
-				// require.Equalf(t, "sc1", *pvc2.Spec.StorageClassName, "storage class name was %q not sc1", *pvc2.Spec.StorageClassName)
+				pvc2, err := clientset.CoreV1().PersistentVolumeClaims("ns2").Get(context.TODO(), "pvc2", metav1.GetOptions{})
+				require.NoError(t, err)
+				require.Equalf(t, "sc1", *pvc2.Spec.StorageClassName, "storage class name was %q not sc1", *pvc2.Spec.StorageClassName)
 
 			},
 			originalPVCs: map[string][]corev1.PersistentVolumeClaim{
@@ -892,17 +894,6 @@ func TestGetPVCs(t *testing.T) {
 						},
 					},
 				},
-				// "ns2": {
-				// 	{
-				// 		ObjectMeta: metav1.ObjectMeta{
-				// 			Name:      "pvc2",
-				// 			Namespace: "ns2",
-				// 		},
-				// 		Spec: corev1.PersistentVolumeClaimSpec{
-				// 			VolumeName: "pv2",
-				// 		},
-				// 	},
-				// },
 			},
 			namespaces: []string{"ns1"},
 		},
